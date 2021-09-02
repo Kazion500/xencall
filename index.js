@@ -12,27 +12,28 @@ const HEADERS ={
 }
 
 app.get('/',async (req,res)=>{
-    const {phone, aptDate,id} = req.query 
-    if(!id && !aptDate){
+    const {phone, apptDate,id} = req.query 
+    console.log(req.query);
+    if(!id && !apptDate){
         return res.sendStatus(400)
     }
     // get contact
-    const contact = getContact(id)
+    const contact = await getContact(id)
     console.log("CONTACT",contact);
+    console.log("DATE",new Date(apptDate));
     try {
         const payload = {
-            "calendarId": "ys6QHQsWSyd1NWs8zvJ6_1630615855296",
+            "calendarId": "ys6QHQsWSyd1NWs8zvJ6",
             "selectedTimezone": "America/Bahia_Banderas",
-            "selectedSlot": aptDate,
-            "email": "john@deo.com",
-            "phone": "+18887324197"
+            "selectedSlot": "2021-09-23T10:30:00-05:00",
+            "phone": phone
         }
         const a = await axios.post(`https://rest.gohighlevel.com/v1/appointments/`,payload,{
             headers:HEADERS
         })
         return res.json({"data":a.data})
     } catch (error) {
-        console.log("ERROR!:", error);
+        console.log("ERROR!:", error.response.data);
         return res.sendStatus(500)
     }
   
@@ -40,13 +41,13 @@ app.get('/',async (req,res)=>{
 
 async function getContact(contactId){
     try {
-        const response = await axios.get(`https://rest.gohighlevel.com/v1/contacts/:${contactId}`,{
+        const response = await axios.get(`https://rest.gohighlevel.com/v1/contacts/${contactId}`,{
             headers:HEADERS
         })
         return response.data
     } catch (error) {
-        console.log("ERROR: ", error.message);
-        return error
+        console.log("ERROR: ", error.response.data);
+        return error.response.data
     }
 }
 
