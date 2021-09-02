@@ -67,7 +67,7 @@ var getD = d.getDate();
 if(getD <10){
  getD= "0"+ getD ;
 }
-var getH = d.getHours();
+var getH = d.getHours()-5;
 if(getH <10){
 getH = "0"+ getH ;
 }
