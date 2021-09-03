@@ -36,7 +36,7 @@ app.get("/", async (req, res) => {
     return res.json({ data: a.data });
   } catch (error) {
     console.log("ERROR!:", error.response.data);
-    return res.sendStatus(500);
+    return res.status(400).send(error.response.data);
   }
 });
 
