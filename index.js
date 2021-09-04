@@ -8,7 +8,10 @@ const HEADERS = {
   Authorization: "Bearer f0f13f30-3c7c-4ada-b280-4582344bfec0",
   "Content-Type": "application/json",
 };
-
+console.log(
+  new Date().toLocaleString("en-US", { timeZone: "America/Bahia_Banderas" }),
+  new Date(new Date().toLocaleString("en-US", { timeZone: "America/Bahia_Banderas" })).getHours()
+);
 app.get("/", async (req, res) => {
   const { phone, apptDate, id } = req.query;
   console.log(req.query);
@@ -21,46 +24,47 @@ app.get("/", async (req, res) => {
 
   try {
     let a;
-    let time = moment().format("hA");
-    if (time < "8AM" || time > "8PM") {
-      a = await putData(res, contact);
-      console.log("PUT: ", a);
+    const hour = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Bahia_Banderas" })).getHours();
+    if (hour < 8 || hour > 20) {
+      console.log("Less > 8Am");
+      a = await putData(contact);
     } else {
-      a = await postData(res);
-      console.log("POST: ", a);
+      console.log("Make post");
+      a = await postData(apptDate, phone);
     }
+    res.send(a);
   } catch (error) {
-    console.log("ERROR!:", error.response.data);
-    return res.status(400).send(error.response.data);
+    console.log("ERROR!:", error);
+    return res.status(400).send(error.message);
   }
 });
 
-async function putData(res, contact) {
+async function putData(contact) {
   try {
-    const payload = JSON.stringify({
-      tags: ["out of time slot"],
-    });
-    const a = await axios.put(
-      `https://rest.gohighlevel.com/v1/contact/${contact?.id}`,
+    const payload = {
+      tags: [...contact.tags, "out of time slot"],
+    };
+    const a = await axios.post(
+      `https://rest.gohighlevel.com/v1/contacts/${contact.id}`,
       payload,
       {
         headers: HEADERS,
       }
     );
-    return res.json({ data: a.data });
+    return a.data;
   } catch (error) {
-    console.log("ERROR!:", error.response.data);
-    return res.status(400).send(error.response.data);
+    console.log("ERROR!:", error);
+    throw error;
   }
 }
 
-async function postData(res) {
+async function postData(apptDate, phone) {
   try {
     const payload = {
       calendarId: "ys6QHQsWSyd1NWs8zvJ6",
       selectedTimezone: "America/Bahia_Banderas",
       selectedSlot: getDate(apptDate),
-      phone: phone,
+      phone,
     };
     const a = await axios.post(
       `https://rest.gohighlevel.com/v1/appointments/`,
@@ -69,10 +73,10 @@ async function postData(res) {
         headers: HEADERS,
       }
     );
-    return res.json({ data: a.data });
+    return a.data;
   } catch (error) {
-    console.log("ERROR!:", error.response.data);
-    return res.status(400).send(error.response.data);
+    console.log("ERROR!:", error);
+    throw error;
   }
 }
 
