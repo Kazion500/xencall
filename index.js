@@ -20,6 +20,42 @@ app.get("/", async (req, res) => {
   console.log("CONTACT", contact);
 
   try {
+    let a;
+    let time = moment().format("hA");
+    if (time < "8AM" || time > "8PM") {
+      a = await putData(res, contact);
+      console.log("PUT: ", a);
+    } else {
+      a = await postData(res);
+      console.log("POST: ", a);
+    }
+  } catch (error) {
+    console.log("ERROR!:", error.response.data);
+    return res.status(400).send(error.response.data);
+  }
+});
+
+async function putData(res, contact) {
+  try {
+    const payload = JSON.stringify({
+      tags: ["out of time slot"],
+    });
+    const a = await axios.put(
+      `https://rest.gohighlevel.com/v1/contact/${contact?.id}`,
+      payload,
+      {
+        headers: HEADERS,
+      }
+    );
+    return res.json({ data: a.data });
+  } catch (error) {
+    console.log("ERROR!:", error.response.data);
+    return res.status(400).send(error.response.data);
+  }
+}
+
+async function postData(res) {
+  try {
     const payload = {
       calendarId: "ys6QHQsWSyd1NWs8zvJ6",
       selectedTimezone: "America/Bahia_Banderas",
@@ -38,7 +74,7 @@ app.get("/", async (req, res) => {
     console.log("ERROR!:", error.response.data);
     return res.status(400).send(error.response.data);
   }
-});
+}
 
 async function getContact(contactId) {
   try {
