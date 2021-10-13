@@ -10,8 +10,11 @@ const HEADERS = {
 };
 console.log(
   new Date().toLocaleString("en-US", { timeZone: "America/Bahia_Banderas" }),
-  new Date(new Date().toLocaleString("en-US", { timeZone: "America/Bahia_Banderas" })).getHours()
+  new Date(
+    new Date().toLocaleString("en-US", { timeZone: "America/Bahia_Banderas" })
+  ).getHours()
 );
+
 app.get("/", async (req, res) => {
   const { phone, apptDate, id } = req.query;
   console.log(req.query);
@@ -24,27 +27,35 @@ app.get("/", async (req, res) => {
 
   try {
     let a;
-    const hour = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Bahia_Banderas" })).getHours();
-    if (hour < 8 || hour > 20) {
+    const appointmentDate =
+      new Date(
+        new Date(getDate(apptDate)).toLocaleString("en-US", {
+          timeZone: "America/Bahia_Banderas",
+        })
+      );
+    console.log(appointmentDate);
+    if (appointmentDate.getHours() < 8 || appointmentDate.getHours() > 20) {
       console.log("Less > 8Am");
-      a = await putData(contact);
+      a = await putData(contact, apptDate);
     } else {
       console.log("Make post");
       a = await postData(apptDate, phone);
     }
-    res.send(a);
+    res.json({a});
   } catch (error) {
-    console.log("ERROR!:", error);
-    return res.status(400).send(error.message);
+    console.log("ERROR!:", error?.response?.data);
+    return res.status(400).send(error?.response?.data);
   }
 });
 
-async function putData(contact) {
+async function putData(contact, apptDate) {
   try {
     const payload = {
-      tags: [...contact.tags, "out of time slot"],
+      customField: {
+        HPx3074jyCnmTheXupv6: new Date(apptDate).toDateString(),
+      },
     };
-    const a = await axios.post(
+    const a = await axios.put(
       `https://rest.gohighlevel.com/v1/contacts/${contact.id}`,
       payload,
       {
@@ -75,7 +86,7 @@ async function postData(apptDate, phone) {
     );
     return a.data;
   } catch (error) {
-    console.log("ERROR!:", error);
+    console.log("ERROR!:", error?.response.data);
     throw error;
   }
 }
@@ -111,6 +122,10 @@ function getDate(date) {
     getH = "0" + getH;
   }
   var getM = d.getMinutes();
+  // var newM = getM % 30;
+  // if (newM != 0) {
+  //   getM -= newM;
+  // }
   if (getM < 10) {
     getM = "0" + getM;
   }
