@@ -20,11 +20,11 @@ console.log(
 app.get("/", async (req, res) => {
   const { phone, apptDate, id } = req.query;
   console.log(req.query);
-  if (!id || !apptDate) {
+  if (!phone || !apptDate) {
     return res.sendStatus(400);
   }
   // get contact
-  const contact = await getContact(id);
+  const contact = await getContact(phone);
   console.log("CONTACT", contact);
 
   try {
@@ -44,7 +44,7 @@ app.get("/", async (req, res) => {
     }
     res.json({ a });
   } catch (error) {
-    console.log("ERROR!:", error?.response?.data);
+    console.log("LINE 47 ERROR!:", error?.response?.data);
     return res.status(400).send(error?.response?.data);
   }
 });
@@ -65,7 +65,7 @@ async function putData(contact, apptDate) {
     );
     return a.data;
   } catch (error) {
-    console.log("ERROR!:", error);
+    console.log("LINE 68 ERROR!:", error.response.data);
     throw error;
   }
 }
@@ -87,20 +87,21 @@ async function postData(apptDate, phone) {
     );
     return a.data;
   } catch (error) {
-    console.log("ERROR!:", error?.response.data);
+    console.log("90 ERROR!:", error?.response.data);
     throw error;
   }
 }
 
-async function getContact(contactId) {
+async function getContact(phone) {
   try {
     const response = await axios.get(
-      `https://rest.gohighlevel.com/v1/contacts/${contactId}`,
+      `https://rest.gohighlevel.com/v1/contacts?query=${phone}`,
       {
         headers: HEADERS,
       }
     );
-    return response.data;
+    const {contacts} = response.data
+    return contacts[0];
   } catch (error) {
     console.log("ERROR: ", error.response.data);
     return error.response.data;
