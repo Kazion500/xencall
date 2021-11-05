@@ -12,7 +12,9 @@ console.log(
   new Date().toLocaleString("en-US", { timeZone: "America/Bahia_Banderas" }),
   new Date(
     new Date().toLocaleString("en-US", { timeZone: "America/Bahia_Banderas" })
-  ).getHours()
+  ).getHours(),
+  "\n \n",
+  getDate("2021-11-06T15:00:00.000Z")
 );
 
 app.get("/", async (req, res) => {
@@ -27,12 +29,11 @@ app.get("/", async (req, res) => {
 
   try {
     let a;
-    const appointmentDate =
-      new Date(
-        new Date(getDate(apptDate)).toLocaleString("en-US", {
-          timeZone: "America/Bahia_Banderas",
-        })
-      );
+    const appointmentDate = new Date(
+      new Date(getDate(apptDate)).toLocaleString("en-US", {
+        timeZone: "America/Bahia_Banderas",
+      })
+    );
     console.log(appointmentDate);
     if (appointmentDate.getHours() < 8 || appointmentDate.getHours() > 20) {
       console.log("Less > 8Am");
@@ -41,7 +42,7 @@ app.get("/", async (req, res) => {
       console.log("Make post");
       a = await postData(apptDate, phone);
     }
-    res.json({a});
+    res.json({ a });
   } catch (error) {
     console.log("ERROR!:", error?.response?.data);
     return res.status(400).send(error?.response?.data);
@@ -107,7 +108,11 @@ async function getContact(contactId) {
 }
 
 function getDate(date) {
-  var d = new Date(date);
+  var d = new Date(
+    new Date(date).toLocaleString("en-US", {
+      timeZone: "America/Bahia_Banderas",
+    })
+  );
 
   var getMo = d.getMonth() + 1;
   if (getMo < 10) {
