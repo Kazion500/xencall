@@ -14,7 +14,7 @@ console.log(
     new Date().toLocaleString("en-US", { timeZone: "America/Bahia_Banderas" })
   ).getHours(),
   "\n \n",
-  getDate("2021-11-06T15:00:00.000Z")
+  getDate("2021-11-05T20:00:00.000Z")
 );
 
 app.get("/", async (req, res) => {
@@ -40,12 +40,15 @@ app.get("/", async (req, res) => {
       a = await putData(contact, apptDate);
     } else {
       console.log("Make post");
-      a = await postData(apptDate, phone);
+      // a = await postData(apptDate, phone);
+       a = await putData(contact,apptDate)
+      console.log(a);
     }
-    res.json({ a });
+    res.json(a);
   } catch (error) {
+
     console.log("LINE 47 ERROR!:", error?.response?.data);
-    return res.status(400).send(error?.response?.data);
+    return res.status(200).json(error?.response?.data);
   }
 });
 
@@ -55,6 +58,7 @@ async function putData(contact, apptDate) {
       customField: {
         HPx3074jyCnmTheXupv6: new Date(apptDate).toDateString(),
       },
+      tags:[...contact.tags,'outside of 8pm to 8am']
     };
     const a = await axios.put(
       `https://rest.gohighlevel.com/v1/contacts/${contact.id}`,
@@ -123,7 +127,7 @@ function getDate(date) {
   if (getD < 10) {
     getD = "0" + getD;
   }
-  var getH = d.getHours() - 5;
+  var getH = d.getHours()-6;
   if (getH < 10) {
     getH = "0" + getH;
   }
